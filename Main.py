@@ -1,3 +1,5 @@
+from google.colab import files
+uploaded = files.upload()
 import cv2
 import numpy as np
 

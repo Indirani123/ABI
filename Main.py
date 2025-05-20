@@ -1,39 +1,28 @@
+!pip install ultralytics opencv-python-headless matplotlib
 from google.colab import files
 uploaded = files.upload()
 import cv2
-import numpy as np
+import matplotlib.pyplot as plt
+from ultralytics import YOLO
+model = YOLO("yolov8n.pt")
+# Get uploaded image path
+image_path = list(uploaded.keys())[0]
 
-def preprocess_image(image_path):
-    # Load image
-    image = cv2.imread(image_path)
-    
-    # Resize image
-    resized = cv2.resize(image, (512, 512))
-    
-    # Convert to grayscale
-    gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-    
-    # Apply Gaussian Blur for noise reduction
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-    
-    # Perform edge detection using Canny
-    edges = cv2.Canny(blurred, 50, 150)
-    
-    # Find contours
-    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # Draw contours on the image
-    processed_image = resized.copy()
-    cv2.drawContours(processed_image, contours, -1, (0, 255, 0), 2)
-    
-    return processed_image, edges
+# Run detection
+results = model(image_path)
 
-# Example usage
-image_path = "damaged_car.jpg"
-processed_image, edge_image = preprocess_image(image_path)
+# Visualize result
+results[0].show()
+from IPython.display import Image, display
+import os
 
-# Display results
-cv2.imshow("Processed Image", processed_image)
-cv2.imshow("Edges", edge_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# Save and show image
+results[0].save(filename='result.jpg')
+img = cv2.imread('result.jpg')
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+plt.figure(figsize=(8, 8))
+plt.imshow(img)
+plt.axis('off')
+plt.title("YOLOv8 Car Damage Detection")
+plt.show()
